@@ -1,0 +1,29 @@
+@import "tailwindcss";
+.quill-content h1 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; }
+.quill-content h2 { font-size: 1.25em; font-weight: bold; margin-bottom: 0.5em; }
+.quill-content p { margin-bottom: 0.5em; }
+.quill-content ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 0.5em; }
+.quill-content ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 0.5em; }
+.quill-content strong { font-weight: bold; }
+.quill-content em { font-style: italic; }
+.quill-content u { text-decoration: underline; }
+.quill-content blockquote { border-left: 4px solid #ccc; padding-left: 1em; color: #666; font-style: italic; margin-bottom: 0.5em; }
+
+@keyframes indeterminate {
+  0% {
+    left: -40%;
+    right: 100%;
+  }
+  60% {
+    left: 100%;
+    right: -40%;
+  }
+  100% {
+    left: 100%;
+    right: -40%;
+  }
+}
+.animate-indeterminate {
+  animation: indeterminate 1.4s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+}
+

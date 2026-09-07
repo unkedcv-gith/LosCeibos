@@ -1,0 +1,8 @@
+{
+  "name": "Los Ceibos | Instituto Educativo",
+  "description": "Los Ceibos | Instituto Educativo",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
