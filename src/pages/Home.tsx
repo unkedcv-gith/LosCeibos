@@ -184,7 +184,7 @@ export function Home() {
             </button>
             {activePopup.imageUrl && (
               <div className="h-64 w-full bg-gray-100">
-                <img src={getDirectImageUrl(activePopup.imageUrl)} alt={activePopup.title} className="w-full h-full object-cover" />
+                <img src={getDirectImageUrl(activePopup.imageUrl)} alt={activePopup.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
             )}
             <div className="p-8">
@@ -357,7 +357,7 @@ export function Home() {
                 <div key={announcement.id} className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                   {announcement.imageUrl && (
                     <div className="h-40 overflow-hidden bg-gray-100">
-                      <img src={getDirectImageUrl(announcement.imageUrl)} alt={announcement.title} className="w-full h-full object-cover" />
+                      <img src={getDirectImageUrl(announcement.imageUrl)} alt={announcement.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     </div>
                   )}
                   <div className="p-6 flex flex-col flex-1">
