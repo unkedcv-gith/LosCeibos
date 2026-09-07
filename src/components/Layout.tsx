@@ -255,7 +255,7 @@ export function Layout() {
               className="bg-white px-4 py-2 rounded-lg shadow-lg text-sm font-bold text-[#22543d] border border-green-100 hover:bg-green-50 transition-colors flex items-center gap-2 whitespace-nowrap"
               onClick={() => setIsWaMenuOpen(false)}
             >
-              🎨 Consulta Jardín
+              🎨 Consulta Nivel Inicial
             </a>
             <a
               href="https://wa.me/5492216807128?text=Hola!%20Me%20gustar%C3%ADa%20recibir%20m%C3%A1s%20informaci%C3%B3n%20sobre%20el%20nivel%20Primaria."
@@ -264,7 +264,7 @@ export function Layout() {
               className="bg-white px-4 py-2 rounded-lg shadow-lg text-sm font-bold text-[#9b1c1c] border border-red-100 hover:bg-red-50 transition-colors flex items-center gap-2 whitespace-nowrap"
               onClick={() => setIsWaMenuOpen(false)}
             >
-              📚 Consulta Primaria
+              📚 Consulta Nivel Primario
             </a>
           </div>
         )}
@@ -401,7 +401,7 @@ export function Layout() {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🎨</span>
                   <div className="text-left">
-                    <div className="font-bold text-sm text-[#22543d]">Consulta Nivel Jardín</div>
+                    <div className="font-bold text-sm text-[#22543d]">Consulta Nivel Inicial</div>
                     <div className="text-xs text-gray-600">Sala de 1, 2, 3, 4 y 5 años</div>
                   </div>
                 </div>

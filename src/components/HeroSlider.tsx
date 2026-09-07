@@ -21,7 +21,7 @@ export function HeroSlider() {
           </p>
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <span className="px-4 py-1.5 rounded text-xs font-bold uppercase text-white tracking-wider bg-[#22543d]">
-              Jardín de Infantes
+              NIVEL INICIAL
             </span>
             <span className="px-4 py-1.5 rounded text-xs font-bold uppercase text-white tracking-wider bg-[#9b1c1c]">
               Nivel Primario
