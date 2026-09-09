@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, writeBatch } from "firebase/firestore";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { db, auth } from "../lib/firebase";
-import { LogOut, Trash2, Edit2, MessageSquare, Plus, ArrowLeft, Star, X, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { LogOut, Trash2, Edit2, MessageSquare, Plus, ArrowLeft, Star, X, CheckCircle, AlertCircle, Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TiptapEditor } from "../components/TiptapEditor";
 import logoImage from "../assets/images/logo_h.svg";
@@ -15,9 +15,13 @@ const TEMPLATES = [
 ];
 
 export function Admin() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [email, setEmail] = useState("admin@colegiolosceiboslp.com.ar");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState("");
 
   // Feedback states
@@ -30,11 +34,26 @@ export function Admin() {
   const [announcementImage, setAnnouncementImage] = useState("");
   const [imageMode, setImageMode] = useState<"template" | "url">("template");
   const [announcementIsPopup, setAnnouncementIsPopup] = useState(false);
+  const [announcementLevel, setAnnouncementLevel] = useState<"general" | "inicial" | "primario">("general");
   const [uploadingA, setUploadingA] = useState(false);
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
 
   // Data
   const [announcements, setAnnouncements] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        setIsAuthenticated(true);
+      } else {
+        setCurrentUser(null);
+        setIsAuthenticated(false);
+      }
+      setAuthChecking(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (notification) {
@@ -56,12 +75,30 @@ export function Admin() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoggingIn(true);
     
     try {
-      await signInWithEmailAndPassword(auth, "admin@colegiolosceiboslp.com.ar", password);
-      setIsAuthenticated(true);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+        setError("Correo electrónico o contraseña incorrectos.");
+      } else if (err.code === "auth/too-many-requests") {
+        setError("Demasiados intentos fallidos. Por seguridad, inténtalo de nuevo en unos minutos.");
+      } else {
+        setError("No se pudo iniciar sesión. Verifica tu conexión y tus credenciales.");
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setPassword("");
     } catch (err) {
-      setError("Contraseña de acceso incorrecta");
+      console.error("Logout error:", err);
     }
   };
 
@@ -84,7 +121,8 @@ export function Admin() {
         content: announcementContent,
         imageUrl: announcementImage,
         date: editingAnnouncementId ? announcements.find(a => a.id === editingAnnouncementId)?.date : Date.now(),
-        isPopup: announcementIsPopup
+        isPopup: announcementIsPopup,
+        level: announcementLevel
       };
 
       if (editingAnnouncementId) {
@@ -99,6 +137,7 @@ export function Admin() {
       setAnnouncementContent("");
       setAnnouncementImage("");
       setAnnouncementIsPopup(false);
+      setAnnouncementLevel("general");
       setEditingAnnouncementId(null);
     } catch (err) {
       console.error(err);
@@ -114,6 +153,7 @@ export function Admin() {
     setAnnouncementContent(a.content);
     setAnnouncementImage(a.imageUrl || "");
     setAnnouncementIsPopup(a.isPopup || false);
+    setAnnouncementLevel(a.level || "general");
     setImageMode(TEMPLATES.some(t => t.url === a.imageUrl) ? "template" : "url");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -154,32 +194,73 @@ export function Admin() {
     }
   };
 
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <img src={logoImage} alt="Los Ceibos" className="h-16 object-contain mx-auto mb-4 animate-pulse" />
+          <p className="text-slate-500 text-sm font-medium">Verificando sesión segura...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-slate-100 relative">
           <Link to="/" className="absolute top-4 left-4 text-slate-400 hover:text-slate-600 flex items-center gap-1 text-sm font-medium transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            Volver
+            Volver a la web
           </Link>
           <div className="text-center mb-8 mt-4">
             <img src={logoImage} alt="Los Ceibos" className="h-20 object-contain mx-auto mb-4" />
-            <h1 className="text-xl font-bold text-slate-800">Panel de Administración</h1>
-            <p className="text-slate-500 text-sm mt-2">Instituto Educativo Los Ceibos</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full mb-2 border border-green-200">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Acceso Seguro Firebase
+            </div>
+            <h1 className="text-2xl font-bold text-slate-800">Panel de Administración</h1>
+            <p className="text-slate-500 text-sm mt-1">Ingresa con tus credenciales institucionales</p>
           </div>
           
           <form onSubmit={handleAuth} className="space-y-4">
-            {error && <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg">{error}</div>}
+            {error && (
+              <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                <span>{error}</span>
+              </div>
+            )}
             
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña de acceso</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Correo electrónico</label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <input 
+                  type="email" 
+                  required 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)} 
+                  placeholder="admin@colegiolosceiboslp.com.ar"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none text-sm" 
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-5 h-5" />
+                </div>
                 <input 
                   type={showPassword ? "text" : "password"} 
                   required 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
-                  className="w-full px-4 py-2 pr-10 border rounded-lg focus:ring-2 focus:ring-green-600 outline-none" 
+                  placeholder="Ingresa tu contraseña"
+                  className="w-full pl-10 pr-11 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-green-600 outline-none text-sm" 
                 />
                 <button 
                   type="button" 
@@ -192,8 +273,19 @@ export function Admin() {
               </div>
             </div>
             
-            <button type="submit" className="w-full bg-[#22543d] hover:bg-[#183c2b] text-white font-medium py-2 rounded-lg transition-colors">
-              Ingresar al Panel
+            <button 
+              type="submit" 
+              disabled={isLoggingIn}
+              className="w-full bg-[#22543d] hover:bg-[#183c2b] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 mt-2 shadow-sm"
+            >
+              {isLoggingIn ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Iniciando sesión...</span>
+                </>
+              ) : (
+                <span>Ingresar al Panel</span>
+              )}
             </button>
           </form>
         </div>
@@ -243,7 +335,7 @@ export function Admin() {
         </div>
       )}
 
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="text-slate-400 hover:text-green-600 transition-colors" title="Volver a la web">
@@ -252,10 +344,13 @@ export function Admin() {
             <h1 className="text-xl font-bold text-slate-800">Panel Admin - Los Ceibos</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-500">Administrador</span>
-            <button onClick={() => setIsAuthenticated(false)} className="text-slate-600 hover:text-red-600 flex items-center gap-2 text-sm font-medium transition-colors">
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-xs font-medium text-slate-700 border border-slate-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-green-600" />
+              <span>{currentUser?.email || "admin@colegiolosceiboslp.com.ar"}</span>
+            </div>
+            <button onClick={handleLogout} className="text-slate-600 hover:text-red-600 flex items-center gap-2 text-sm font-medium transition-colors bg-slate-50 hover:bg-red-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200">
               <LogOut className="w-4 h-4" />
-              Salir
+              Cerrar sesión
             </button>
           </div>
         </div>
@@ -334,6 +429,23 @@ export function Admin() {
                   </div>
                 )}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Nivel asociado (WhatsApp)</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="level" value="general" checked={announcementLevel === "general"} onChange={() => setAnnouncementLevel("general")} className="text-green-600 focus:ring-green-600" />
+                    <span className="text-sm text-slate-700">General</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="level" value="inicial" checked={announcementLevel === "inicial"} onChange={() => setAnnouncementLevel("inicial")} className="text-green-600 focus:ring-green-600" />
+                    <span className="text-sm text-slate-700">Nivel Inicial</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="level" value="primario" checked={announcementLevel === "primario"} onChange={() => setAnnouncementLevel("primario")} className="text-green-600 focus:ring-green-600" />
+                    <span className="text-sm text-slate-700">Nivel Primario</span>
+                  </label>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="isPopup" checked={announcementIsPopup} onChange={e => setAnnouncementIsPopup(e.target.checked)} className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-600" />
                 <label htmlFor="isPopup" className="text-sm font-medium text-slate-700">Mostrar como ventana emergente (Popup) en el Inicio</label>
@@ -349,6 +461,7 @@ export function Admin() {
                     setAnnouncementContent("");
                     setAnnouncementImage("");
                     setAnnouncementIsPopup(false);
+                    setAnnouncementLevel("general");
                   }} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors">
                     Cancelar
                   </button>

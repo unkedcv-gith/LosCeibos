@@ -43,7 +43,24 @@ interface Announcement {
   date: number;
   imageUrl?: string;
   isPopup?: boolean;
+  level?: "general" | "inicial" | "primario";
 }
+
+// WhatsApp Configs
+const WHATSAPP_CONFIG = {
+  general: {
+    phone: "5492214288051",
+    bgClass: "bg-[#22543d] hover:bg-[#183c2b]",
+  },
+  inicial: {
+    phone: "5492214288051",
+    bgClass: "bg-[#25D366] hover:bg-[#20bd5a]",
+  },
+  primario: {
+    phone: "5492216807128",
+    bgClass: "bg-[#9b1c1c] hover:bg-[#7a1515]",
+  }
+};
 
 export function Home() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -195,10 +212,10 @@ export function Home() {
               <h3 className="text-[#333333] font-bold text-2xl mb-4">{activePopup.title}</h3>
               <div className="text-gray-600 text-sm leading-relaxed quill-content mb-6" dangerouslySetInnerHTML={{ __html: activePopup.content }} />
               <a 
-                href={`https://wa.me/5492214288051?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(activePopup.title)}`}
+                href={`https://wa.me/${WHATSAPP_CONFIG[activePopup.level || "general"].phone}?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(activePopup.title)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-[#22543d] hover:bg-[#183c2b] text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                className={`w-full text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[activePopup.level || "general"].bgClass}`}
               >
                 <MessageCircle className="w-5 h-5" />
                 Consultar por WhatsApp
@@ -368,10 +385,10 @@ export function Home() {
                     <h3 className="text-[#333333] font-bold text-base mb-2">{announcement.title}</h3>
                     <div className="text-gray-600 text-xs flex-1 leading-relaxed quill-content line-clamp-4 mb-4" dangerouslySetInnerHTML={{ __html: announcement.content }} />
                     <a 
-                      href={`https://wa.me/5492214288051?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(announcement.title)}`}
+                      href={`https://wa.me/${WHATSAPP_CONFIG[announcement.level || "general"].phone}?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(announcement.title)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-auto bg-[#22543d] hover:bg-[#183c2b] text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
+                      className={`mt-auto text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[announcement.level || "general"].bgClass}`}
                     >
                       <MessageCircle className="w-4 h-4" />
                       Consultar por WhatsApp
