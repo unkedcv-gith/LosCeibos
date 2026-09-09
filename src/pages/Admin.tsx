@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, addDoc, updateDoc, deleteDoc, doc, query, orderBy, onSnapshot, writeBatch } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { db, auth } from "../lib/firebase";
 import { LogOut, Trash2, Edit2, MessageSquare, Plus, ArrowLeft, Star, X, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TiptapEditor } from "../components/TiptapEditor";
@@ -56,13 +57,12 @@ export function Admin() {
     e.preventDefault();
     setError("");
     
-    // Very simple access code
-    if (password !== "Losceibos26") {
+    try {
+      await signInWithEmailAndPassword(auth, "admin@colegiolosceiboslp.com.ar", password);
+      setIsAuthenticated(true);
+    } catch (err) {
       setError("Contraseña de acceso incorrecta");
-      return;
     }
-
-    setIsAuthenticated(true);
   };
 
   const handleAddAnnouncement = async (e: React.FormEvent) => {

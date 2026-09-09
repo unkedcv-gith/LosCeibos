@@ -184,7 +184,7 @@ export function Home() {
             </button>
             {activePopup.imageUrl && (
               <div className="h-64 w-full bg-gray-100">
-                <img src={getDirectImageUrl(activePopup.imageUrl)} alt={activePopup.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                <img loading="lazy"  src={getDirectImageUrl(activePopup.imageUrl)} alt={activePopup.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
             )}
             <div className="p-8">
@@ -357,7 +357,7 @@ export function Home() {
                 <div key={announcement.id} className="bg-white rounded shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                   {announcement.imageUrl && (
                     <div className="h-40 overflow-hidden bg-gray-100">
-                      <img src={getDirectImageUrl(announcement.imageUrl)} alt={announcement.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      <img loading="lazy"  src={getDirectImageUrl(announcement.imageUrl)} alt={announcement.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                     </div>
                   )}
                   <div className="p-6 flex flex-col flex-1">
@@ -400,11 +400,11 @@ export function Home() {
                 aria-label={`Ver foto ${idx + 1} ampliada`}
                 className="aspect-square rounded-xl overflow-hidden group relative bg-gray-100 border border-gray-200 shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-[#22543d] transition-all"
               >
-                <img 
+                <img loading="lazy"  
                   src={src} 
                   alt={`Galería foto ${idx + 1}`} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" 
-                  loading="lazy"
+                  
                 />
                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <div className="bg-white/90 text-gray-800 p-2.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
@@ -463,7 +463,7 @@ export function Home() {
               className="relative max-w-5xl max-h-[75vh] md:max-h-[80vh] flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <img 
+              <img loading="lazy"  
                 key={selectedImageIndex}
                 src={staticGalleryImages[selectedImageIndex]} 
                 alt={`Galería foto ampliada ${selectedImageIndex + 1}`} 
@@ -501,7 +501,7 @@ export function Home() {
                   }`}
                   aria-label={`Ir a la foto ${idx + 1}`}
                 >
-                  <img src={thumbSrc} alt="" className="w-full h-full object-cover" />
+                  <img loading="lazy"  src={thumbSrc} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -555,7 +555,7 @@ export function Home() {
                   height="100%" 
                   style={{ border: 0 }} 
                   allowFullScreen 
-                  loading="lazy" 
+                   
                   referrerPolicy="no-referrer-when-downgrade"
                   className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
                   title="Ubicación Nivel Inicial"
@@ -597,7 +597,7 @@ export function Home() {
                   height="100%" 
                   style={{ border: 0 }} 
                   allowFullScreen 
-                  loading="lazy" 
+                   
                   referrerPolicy="no-referrer-when-downgrade"
                   className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
                   title="Ubicación Nivel Primario"
