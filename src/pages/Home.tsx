@@ -4,7 +4,7 @@ import { db } from "../lib/firebase";
 import { HeroSlider } from "../components/HeroSlider";
 import { ContactForm } from "../components/ContactForm";
 import { Reviews } from "../components/Reviews";
-import { getDirectImageUrl } from "../lib/utils";
+import { getDirectImageUrl, buildWhatsAppConsultationUrl } from "../lib/utils";
 import { 
   MapPin, 
   Mail, 
@@ -43,7 +43,7 @@ interface Announcement {
   date: number;
   imageUrl?: string;
   isPopup?: boolean;
-  level?: "general" | "inicial" | "primario";
+  level?: "none" | "inicial" | "primario" | "general";
 }
 
 // WhatsApp Configs
@@ -211,15 +211,17 @@ export function Home() {
               </div>
               <h3 className="text-[#333333] font-bold text-2xl mb-4">{activePopup.title}</h3>
               <div className="text-gray-600 text-sm leading-relaxed quill-content mb-6" dangerouslySetInnerHTML={{ __html: activePopup.content }} />
-              <a 
-                href={`https://wa.me/${WHATSAPP_CONFIG[activePopup.level || "general"].phone}?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(activePopup.title)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[activePopup.level || "general"].bgClass}`}
-              >
-                <MessageCircle className="w-5 h-5" />
-                Consultar por WhatsApp
-              </a>
+              {activePopup.level && activePopup.level !== "none" && WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG] && (
+                <a 
+                  href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG].phone, activePopup.title)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full text-white text-sm font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG].bgClass}`}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Consultar por WhatsApp
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -384,15 +386,17 @@ export function Home() {
                     </div>
                     <h3 className="text-[#333333] font-bold text-base mb-2">{announcement.title}</h3>
                     <div className="text-gray-600 text-xs flex-1 leading-relaxed quill-content line-clamp-4 mb-4" dangerouslySetInnerHTML={{ __html: announcement.content }} />
-                    <a 
-                      href={`https://wa.me/${WHATSAPP_CONFIG[announcement.level || "general"].phone}?text=Hola!%20Me%20gustaría%20consultar%20sobre:%20${encodeURIComponent(announcement.title)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`mt-auto text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[announcement.level || "general"].bgClass}`}
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      Consultar por WhatsApp
-                    </a>
+                    {announcement.level && announcement.level !== "none" && WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG] && (
+                      <a 
+                        href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG].phone, announcement.title)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`mt-auto text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2 ${WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG].bgClass}`}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        Consultar por WhatsApp
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}

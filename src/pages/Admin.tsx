@@ -34,7 +34,7 @@ export function Admin() {
   const [announcementImage, setAnnouncementImage] = useState("");
   const [imageMode, setImageMode] = useState<"template" | "url">("template");
   const [announcementIsPopup, setAnnouncementIsPopup] = useState(false);
-  const [announcementLevel, setAnnouncementLevel] = useState<"general" | "inicial" | "primario">("general");
+  const [announcementLevel, setAnnouncementLevel] = useState<"none" | "inicial" | "primario">("none");
   const [uploadingA, setUploadingA] = useState(false);
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
 
@@ -116,8 +116,14 @@ export function Admin() {
         await batch.commit();
       }
 
+      const sanitizedTitle = announcementTitle
+        .replace(/[\uFFFD\uFEFF]/g, "")
+        .replace(/[“”«»]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .trim();
+
       const announcementData = {
-        title: announcementTitle,
+        title: sanitizedTitle,
         content: announcementContent,
         imageUrl: announcementImage,
         date: editingAnnouncementId ? announcements.find(a => a.id === editingAnnouncementId)?.date : Date.now(),
@@ -137,7 +143,7 @@ export function Admin() {
       setAnnouncementContent("");
       setAnnouncementImage("");
       setAnnouncementIsPopup(false);
-      setAnnouncementLevel("general");
+      setAnnouncementLevel("none");
       setEditingAnnouncementId(null);
     } catch (err) {
       console.error(err);
@@ -153,7 +159,7 @@ export function Admin() {
     setAnnouncementContent(a.content);
     setAnnouncementImage(a.imageUrl || "");
     setAnnouncementIsPopup(a.isPopup || false);
-    setAnnouncementLevel(a.level || "general");
+    setAnnouncementLevel(a.level === "inicial" || a.level === "primario" ? a.level : "none");
     setImageMode(TEMPLATES.some(t => t.url === a.imageUrl) ? "template" : "url");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -430,19 +436,40 @@ export function Admin() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Nivel asociado (WhatsApp)</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="level" value="general" checked={announcementLevel === "general"} onChange={() => setAnnouncementLevel("general")} className="text-green-600 focus:ring-green-600" />
-                    <span className="text-sm text-slate-700">General</span>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Opción de consulta por WhatsApp</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${announcementLevel === "none" ? "border-slate-800 bg-slate-50 text-slate-900 font-medium ring-1 ring-slate-800" : "border-slate-200 hover:border-slate-300 text-slate-600"}`}>
+                    <input 
+                      type="radio" 
+                      name="level" 
+                      value="none" 
+                      checked={announcementLevel === "none"} 
+                      onChange={() => setAnnouncementLevel("none")} 
+                      className="text-slate-800 focus:ring-slate-800" 
+                    />
+                    <span className="text-sm">Sin consulta (Sin WhatsApp)</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="level" value="inicial" checked={announcementLevel === "inicial"} onChange={() => setAnnouncementLevel("inicial")} className="text-green-600 focus:ring-green-600" />
-                    <span className="text-sm text-slate-700">Nivel Inicial</span>
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${announcementLevel === "inicial" ? "border-green-600 bg-green-50 text-green-900 font-medium ring-1 ring-green-600" : "border-slate-200 hover:border-slate-300 text-slate-600"}`}>
+                    <input 
+                      type="radio" 
+                      name="level" 
+                      value="inicial" 
+                      checked={announcementLevel === "inicial"} 
+                      onChange={() => setAnnouncementLevel("inicial")} 
+                      className="text-green-600 focus:ring-green-600" 
+                    />
+                    <span className="text-sm">WhatsApp Nivel Inicial</span>
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="level" value="primario" checked={announcementLevel === "primario"} onChange={() => setAnnouncementLevel("primario")} className="text-green-600 focus:ring-green-600" />
-                    <span className="text-sm text-slate-700">Nivel Primario</span>
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${announcementLevel === "primario" ? "border-[#9b1c1c] bg-red-50 text-red-900 font-medium ring-1 ring-[#9b1c1c]" : "border-slate-200 hover:border-slate-300 text-slate-600"}`}>
+                    <input 
+                      type="radio" 
+                      name="level" 
+                      value="primario" 
+                      checked={announcementLevel === "primario"} 
+                      onChange={() => setAnnouncementLevel("primario")} 
+                      className="text-[#9b1c1c] focus:ring-[#9b1c1c]" 
+                    />
+                    <span className="text-sm">WhatsApp Nivel Primario</span>
                   </label>
                 </div>
               </div>
@@ -461,7 +488,7 @@ export function Admin() {
                     setAnnouncementContent("");
                     setAnnouncementImage("");
                     setAnnouncementIsPopup(false);
-                    setAnnouncementLevel("general");
+                    setAnnouncementLevel("none");
                   }} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors">
                     Cancelar
                   </button>
@@ -476,9 +503,18 @@ export function Admin() {
               {announcements.map(a => (
                 <div key={a.id} className={`border p-4 rounded-xl flex justify-between items-start gap-4 ${a.isPopup ? 'border-yellow-400 bg-yellow-50' : 'border-slate-100'}`}>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-semibold text-slate-800">{a.title}</h4>
                       {a.isPopup && <span className="text-[10px] bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-bold uppercase">Popup Activo</span>}
+                      {a.level === "inicial" && (
+                        <span className="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">WhatsApp Inicial</span>
+                      )}
+                      {a.level === "primario" && (
+                        <span className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-medium">WhatsApp Primario</span>
+                      )}
+                      {(!a.level || a.level === "none") && (
+                        <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">Sin consulta</span>
+                      )}
                     </div>
                     <div className="text-sm text-slate-500 line-clamp-2 mt-1" dangerouslySetInnerHTML={{ __html: a.content }} />
                   </div>
