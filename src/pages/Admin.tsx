@@ -34,7 +34,7 @@ export function Admin() {
   const [announcementImage, setAnnouncementImage] = useState("");
   const [imageMode, setImageMode] = useState<"template" | "url">("template");
   const [announcementIsPopup, setAnnouncementIsPopup] = useState(false);
-  const [announcementLevel, setAnnouncementLevel] = useState<"none" | "inicial" | "primario">("none");
+  const [announcementLevel, setAnnouncementLevel] = useState<"none" | "inicial" | "primario" | "ambos">("none");
   const [uploadingA, setUploadingA] = useState(false);
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
 
@@ -159,7 +159,7 @@ export function Admin() {
     setAnnouncementContent(a.content);
     setAnnouncementImage(a.imageUrl || "");
     setAnnouncementIsPopup(a.isPopup || false);
-    setAnnouncementLevel(a.level === "inicial" || a.level === "primario" ? a.level : "none");
+    setAnnouncementLevel(a.level === "inicial" || a.level === "primario" || a.level === "ambos" ? a.level : "none");
     setImageMode(TEMPLATES.some(t => t.url === a.imageUrl) ? "template" : "url");
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -437,7 +437,7 @@ export function Admin() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Opción de consulta por WhatsApp</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                   <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${announcementLevel === "none" ? "border-slate-800 bg-slate-50 text-slate-900 font-medium ring-1 ring-slate-800" : "border-slate-200 hover:border-slate-300 text-slate-600"}`}>
                     <input 
                       type="radio" 
@@ -470,6 +470,17 @@ export function Admin() {
                       className="text-[#9b1c1c] focus:ring-[#9b1c1c]" 
                     />
                     <span className="text-sm">WhatsApp Nivel Primario</span>
+                  </label>
+                  <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all ${announcementLevel === "ambos" ? "border-teal-700 bg-teal-50 text-teal-900 font-medium ring-1 ring-teal-700" : "border-slate-200 hover:border-slate-300 text-slate-600"}`}>
+                    <input 
+                      type="radio" 
+                      name="level" 
+                      value="ambos" 
+                      checked={announcementLevel === "ambos"} 
+                      onChange={() => setAnnouncementLevel("ambos")} 
+                      className="text-teal-700 focus:ring-teal-700" 
+                    />
+                    <span className="text-sm">WhatsApp Nivel Inicial & Primario</span>
                   </label>
                 </div>
               </div>
@@ -511,6 +522,9 @@ export function Admin() {
                       )}
                       {a.level === "primario" && (
                         <span className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-medium">WhatsApp Primario</span>
+                      )}
+                      {a.level === "ambos" && (
+                        <span className="text-[10px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-medium">WhatsApp Inicial & Primario</span>
                       )}
                       {(!a.level || a.level === "none") && (
                         <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">Sin consulta</span>

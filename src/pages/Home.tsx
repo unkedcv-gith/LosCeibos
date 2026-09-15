@@ -83,7 +83,7 @@ interface Announcement {
   date: number;
   imageUrl?: string;
   isPopup?: boolean;
-  level?: "none" | "inicial" | "primario" | "general";
+  level?: "none" | "inicial" | "primario" | "ambos" | "general";
 }
 
 // WhatsApp Configs
@@ -252,7 +252,28 @@ export function Home() {
               </div>
               <h3 className="text-[#333333] font-bold text-2xl mb-4">{activePopup.title}</h3>
               <div className="text-gray-600 text-sm leading-relaxed quill-content mb-6" dangerouslySetInnerHTML={{ __html: activePopup.content }} />
-              {activePopup.level && activePopup.level !== "none" && WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG] && (
+              {activePopup.level === "ambos" ? (
+                <div className="w-full flex flex-col sm:flex-row gap-2.5">
+                  <a 
+                    href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.inicial.phone, activePopup.title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 text-white text-xs md:text-sm font-bold py-3 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a]"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp Nivel Inicial
+                  </a>
+                  <a 
+                    href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.primario.phone, activePopup.title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 text-white text-xs md:text-sm font-bold py-3 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 bg-[#9b1c1c] hover:bg-[#7a1515]"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    WhatsApp Nivel Primario
+                  </a>
+                </div>
+              ) : activePopup.level && activePopup.level !== "none" && WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG] ? (
                 <a 
                   href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG].phone, activePopup.title)}
                   target="_blank"
@@ -262,7 +283,7 @@ export function Home() {
                   <MessageCircle className="w-5 h-5" />
                   Consultar por WhatsApp
                 </a>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -427,7 +448,28 @@ export function Home() {
                     </div>
                     <h3 className="text-[#333333] font-bold text-base mb-2">{announcement.title}</h3>
                     <div className="text-gray-600 text-xs flex-1 leading-relaxed quill-content line-clamp-4 mb-4" dangerouslySetInnerHTML={{ __html: announcement.content }} />
-                    {announcement.level && announcement.level !== "none" && WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG] && (
+                    {announcement.level === "ambos" ? (
+                      <div className="mt-auto flex flex-col sm:flex-row gap-2 pt-1">
+                        <a 
+                          href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.inicial.phone, announcement.title)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 text-white text-[11px] font-bold py-2 px-2 rounded transition-colors flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#20bd5a]"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          WhatsApp Inicial
+                        </a>
+                        <a 
+                          href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.primario.phone, announcement.title)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 text-white text-[11px] font-bold py-2 px-2 rounded transition-colors flex items-center justify-center gap-1 bg-[#9b1c1c] hover:bg-[#7a1515]"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          WhatsApp Primario
+                        </a>
+                      </div>
+                    ) : announcement.level && announcement.level !== "none" && WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG] ? (
                       <a 
                         href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG].phone, announcement.title)}
                         target="_blank"
@@ -437,7 +479,7 @@ export function Home() {
                         <MessageCircle className="w-4 h-4" />
                         Consultar por WhatsApp
                       </a>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))}
