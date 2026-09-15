@@ -519,7 +519,7 @@ export function Home() {
                       </span>
                     </div>
                     <p className="text-xs md:text-sm text-gray-500 mt-1">
-                      Salas de 3, 4 y 5 años: talleres artísticos, motricidad, iniciación al inglés y juego compartido.
+                      Salas de 2, 3, 4 y 5 años: talleres artísticos, motricidad, iniciación al inglés y juego compartido.
                     </p>
                   </div>
                   <span className="text-xs text-gray-400 font-medium">6 fotos</span>
