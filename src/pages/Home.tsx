@@ -34,7 +34,47 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import misionValoresVideo from "../assets/videos/mision_valores.mp4";
 
-const staticGalleryImages = Object.values(import.meta.glob('../assets/images/galeria_*.jpg', { eager: true, import: 'default' })) as string[];
+// Imágenes de Galería Nivel Inicial
+import galeriaInicial1 from "../assets/images/galeria_inicial1.jpeg";
+import galeriaInicial2 from "../assets/images/galeria_inicial2.jpeg";
+import galeriaInicial3 from "../assets/images/galeria_inicial3.jpeg";
+import galeriaInicial4 from "../assets/images/galeria_inicial4.jpeg";
+import galeriaInicial5 from "../assets/images/galeria_inicial5.jpeg";
+import galeriaInicial6 from "../assets/images/galeria_inicial6.jpeg";
+
+// Imágenes de Galería Nivel Primario
+import galeriaPrimario1 from "../assets/images/galeria_primario1.jpeg";
+import galeriaPrimario2 from "../assets/images/galeria_primario2.jpeg";
+import galeriaPrimario3 from "../assets/images/galeria_primario3.jpeg";
+import galeriaPrimario4 from "../assets/images/galeria_primario4.jpeg";
+import galeriaPrimario5 from "../assets/images/galeria_primario5.jpeg";
+import galeriaPrimario6 from "../assets/images/galeria_primario6.jpeg";
+
+export interface GalleryItem {
+  id: string;
+  src: string;
+  level: "inicial" | "primario";
+  levelName: string;
+  alt: string;
+}
+
+const GALERIA_INICIAL: GalleryItem[] = [
+  { id: "inicial-1", src: galeriaInicial1, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Actividades y proyectos lúdicos" },
+  { id: "inicial-2", src: galeriaInicial2, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Expresión artística y creatividad" },
+  { id: "inicial-3", src: galeriaInicial3, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Espacio de juego y socialización" },
+  { id: "inicial-4", src: galeriaInicial4, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Talleres y motricidad" },
+  { id: "inicial-5", src: galeriaInicial5, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Aprendizaje guiado y afectivo" },
+  { id: "inicial-6", src: galeriaInicial6, level: "inicial", levelName: "Nivel Inicial", alt: "Nivel Inicial - Momentos en el jardín" },
+];
+
+const GALERIA_PRIMARIO: GalleryItem[] = [
+  { id: "primario-1", src: galeriaPrimario1, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Aprendizaje y trabajo en equipo" },
+  { id: "primario-2", src: galeriaPrimario2, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Actividades en el aula" },
+  { id: "primario-3", src: galeriaPrimario3, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Proyectos educativos y ciencia" },
+  { id: "primario-4", src: galeriaPrimario4, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Formación integral y valores" },
+  { id: "primario-5", src: galeriaPrimario5, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Deportes y vida al aire libre" },
+  { id: "primario-6", src: galeriaPrimario6, level: "primario", levelName: "Nivel Primario", alt: "Nivel Primario - Convivencia y jornada extendida" },
+];
 
 interface Announcement {
   id: string;
@@ -71,38 +111,39 @@ export function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [activePopup, setActivePopup] = useState<Announcement | null>(null);
 
-  // Gallery Lightbox State
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  // Gallery Tab & Lightbox State
+  const [galleryTab, setGalleryTab] = useState<"todas" | "inicial" | "primario">("todas");
+  const [lightboxData, setLightboxData] = useState<{ items: GalleryItem[]; index: number } | null>(null);
   const touchStartXRef = useRef<number | null>(null);
   const touchEndXRef = useRef<number | null>(null);
 
-  const openLightbox = (index: number) => {
-    setSelectedImageIndex(index);
+  const openLightbox = (items: GalleryItem[], index: number) => {
+    setLightboxData({ items, index });
     document.body.style.overflow = "hidden";
   };
 
   const closeLightbox = useCallback(() => {
-    setSelectedImageIndex(null);
+    setLightboxData(null);
     document.body.style.overflow = "unset";
   }, []);
 
   const nextImage = useCallback(() => {
-    setSelectedImageIndex((prev) => {
-      if (prev === null) return null;
-      return (prev + 1) % staticGalleryImages.length;
+    setLightboxData((prev) => {
+      if (!prev) return null;
+      return { ...prev, index: (prev.index + 1) % prev.items.length };
     });
   }, []);
 
   const prevImage = useCallback(() => {
-    setSelectedImageIndex((prev) => {
-      if (prev === null) return null;
-      return (prev - 1 + staticGalleryImages.length) % staticGalleryImages.length;
+    setLightboxData((prev) => {
+      if (!prev) return null;
+      return { ...prev, index: (prev.index - 1 + prev.items.length) % prev.items.length };
     });
   }, []);
 
   // Keyboard navigation for lightbox
   useEffect(() => {
-    if (selectedImageIndex === null) return;
+    if (lightboxData === null) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeLightbox();
@@ -112,7 +153,7 @@ export function Home() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImageIndex, closeLightbox, nextImage, prevImage]);
+  }, [lightboxData, closeLightbox, nextImage, prevImage]);
 
   // Touch handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -408,52 +449,191 @@ export function Home() {
       {/* Gallery */}
       <section id="galeria" className="py-20 bg-[#f9fafb] scroll-mt-28">
         <div className="max-w-7xl mx-auto px-8">
-          <div className="mb-12">
-            <h2 className="text-[#22543d] font-bold uppercase tracking-wider text-2xl mb-4 border-l-4 border-[#9b1c1c] pl-3">Galería de Imágenes</h2>
-            <p className="text-sm text-gray-600">Un recorrido visual por las actividades de nuestros alumnos. Tocá cualquier foto para ampliar.</p>
+          <div className="mb-10 text-center">
+            <h2 className="text-[#22543d] font-bold uppercase tracking-wider text-2xl mb-3 inline-block border-b-2 border-[#9b1c1c] pb-1">
+              Galería de Fotos
+            </h2>
+            <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
+              Un recorrido visual por las actividades, proyectos y experiencias cotidianas de nuestros alumnos.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {staticGalleryImages.map((src, idx) => (
-              <button 
-                key={`static-${idx}`} 
-                onClick={() => openLightbox(idx)}
-                aria-label={`Ver foto ${idx + 1} ampliada`}
-                className="aspect-square rounded-xl overflow-hidden group relative bg-gray-100 border border-gray-200 shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-[#22543d] transition-all"
-              >
-                <img loading="lazy"  
-                  src={src} 
-                  alt={`Galería foto ${idx + 1}`} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" 
-                  
-                />
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="bg-white/90 text-gray-800 p-2.5 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                    <ZoomIn className="w-5 h-5" />
+
+          {/* Filter / Level Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 md:gap-3 mb-12">
+            <button
+              onClick={() => setGalleryTab("todas")}
+              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                galleryTab === "todas"
+                  ? "bg-[#22543d] text-white shadow-md ring-2 ring-[#22543d]/25 scale-105"
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              <span>Ver Todas</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${galleryTab === "todas" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}>
+                {GALERIA_INICIAL.length + GALERIA_PRIMARIO.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setGalleryTab("inicial")}
+              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                galleryTab === "inicial"
+                  ? "bg-[#25D366] text-white shadow-md ring-2 ring-[#25D366]/30 scale-105"
+                  : "bg-white text-gray-700 hover:bg-emerald-50/50 border border-gray-200 hover:border-emerald-300"
+              }`}
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] inline-block" />
+              <span>Galería Nivel Inicial</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${galleryTab === "inicial" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}>
+                {GALERIA_INICIAL.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setGalleryTab("primario")}
+              className={`px-5 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 flex items-center gap-2 ${
+                galleryTab === "primario"
+                  ? "bg-[#9b1c1c] text-white shadow-md ring-2 ring-[#9b1c1c]/30 scale-105"
+                  : "bg-white text-gray-700 hover:bg-red-50/50 border border-gray-200 hover:border-red-300"
+              }`}
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-[#9b1c1c] inline-block" />
+              <span>Galería Nivel Primario</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${galleryTab === "primario" ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600"}`}>
+                {GALERIA_PRIMARIO.length}
+              </span>
+            </button>
+          </div>
+
+          <div className="space-y-16">
+            {/* Galería Nivel Inicial */}
+            {(galleryTab === "todas" || galleryTab === "inicial") && (
+              <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-3 h-3 rounded-full bg-[#25D366]" />
+                      <h3 className="text-xl md:text-2xl font-bold text-[#22543d]">Galería Nivel Inicial</h3>
+                      <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                        Jardín de Infantes
+                      </span>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">
+                      Salas de 3, 4 y 5 años: talleres artísticos, motricidad, iniciación al inglés y juego compartido.
+                    </p>
                   </div>
+                  <span className="text-xs text-gray-400 font-medium">6 fotos</span>
                 </div>
-              </button>
-            ))}
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 md:gap-4">
+                  {GALERIA_INICIAL.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => openLightbox(GALERIA_INICIAL, idx)}
+                      aria-label={`Ver foto ${idx + 1} de Nivel Inicial ampliada`}
+                      className="aspect-square rounded-xl overflow-hidden group relative bg-gray-100 border border-gray-200/80 shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-[#25D366] transition-all"
+                    >
+                      <img
+                        loading="lazy"
+                        src={item.src}
+                        alt={item.alt}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-2.5">
+                        <span className="self-start text-[10px] font-bold bg-[#25D366] text-white px-2 py-0.5 rounded-md shadow">
+                          Inicial
+                        </span>
+                        <div className="self-center bg-white/90 text-gray-800 p-2 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <ZoomIn className="w-4 h-4" />
+                        </div>
+                        <span className="text-white text-[11px] font-medium drop-shadow-md text-center line-clamp-1">
+                          Foto {idx + 1}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Galería Nivel Primario */}
+            {(galleryTab === "todas" || galleryTab === "primario") && (
+              <div className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-3 h-3 rounded-full bg-[#9b1c1c]" />
+                      <h3 className="text-xl md:text-2xl font-bold text-[#9b1c1c]">Galería Nivel Primario</h3>
+                      <span className="text-[11px] font-semibold bg-red-100 text-red-800 px-2.5 py-0.5 rounded-full">
+                        1° a 6° año · Jornada Extendida
+                      </span>
+                    </div>
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">
+                      Deportes diarios, educación digital, idiomas (inglés y portugués) y proyectos pedagógicos integrales.
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 font-medium">6 fotos</span>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 md:gap-4">
+                  {GALERIA_PRIMARIO.map((item, idx) => (
+                    <button
+                      key={item.id}
+                      onClick={() => openLightbox(GALERIA_PRIMARIO, idx)}
+                      aria-label={`Ver foto ${idx + 1} de Nivel Primario ampliada`}
+                      className="aspect-square rounded-xl overflow-hidden group relative bg-gray-100 border border-gray-200/80 shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-[#9b1c1c] transition-all"
+                    >
+                      <img
+                        loading="lazy"
+                        src={item.src}
+                        alt={item.alt}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-2.5">
+                        <span className="self-start text-[10px] font-bold bg-[#9b1c1c] text-white px-2 py-0.5 rounded-md shadow">
+                          Primario
+                        </span>
+                        <div className="self-center bg-white/90 text-gray-800 p-2 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <ZoomIn className="w-4 h-4" />
+                        </div>
+                        <span className="text-white text-[11px] font-medium drop-shadow-md text-center line-clamp-1">
+                          Foto {idx + 1}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Gallery Lightbox Modal with Infinite Loop Navigation */}
-      {selectedImageIndex !== null && (
+      {lightboxData !== null && (
         <div 
-          className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-lg flex flex-col items-center justify-between p-3 md:p-6 animate-in fade-in duration-200 select-none touch-none"
+          className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-md flex flex-col items-center justify-between p-3 md:p-6 animate-in fade-in duration-200 select-none touch-none"
           onClick={closeLightbox}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Top Bar: Counter & Close Button */}
+          {/* Top Bar: Counter & Level Badge & Close Button */}
           <div 
             className="w-full max-w-6xl flex items-center justify-between z-20 pt-1 px-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white/15 backdrop-blur-md text-white text-xs md:text-sm font-semibold px-4 py-1.5 rounded-full border border-white/20 shadow-sm">
-              Foto {selectedImageIndex + 1} de {staticGalleryImages.length}
+            <div className="flex items-center gap-2">
+              <span className={`text-xs md:text-sm font-semibold px-3 py-1 rounded-full border shadow-sm ${
+                lightboxData.items[lightboxData.index].level === "inicial"
+                  ? "bg-emerald-500/25 text-emerald-300 border-emerald-400/40"
+                  : "bg-red-500/25 text-rose-200 border-red-400/40"
+              }`}>
+                {lightboxData.items[lightboxData.index].levelName}
+              </span>
+              <div className="bg-white/15 backdrop-blur-md text-white text-xs md:text-sm font-medium px-3.5 py-1 rounded-full border border-white/20 shadow-sm">
+                Foto {lightboxData.index + 1} de {lightboxData.items.length}
+              </div>
             </div>
 
             <button 
@@ -485,10 +665,10 @@ export function Home() {
               onClick={(e) => e.stopPropagation()}
             >
               <img loading="lazy"  
-                key={selectedImageIndex}
-                src={staticGalleryImages[selectedImageIndex]} 
-                alt={`Galería foto ampliada ${selectedImageIndex + 1}`} 
-                className="max-h-[75vh] md:max-h-[80vh] max-w-[90vw] md:max-w-4xl w-auto h-auto object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
+                key={`${lightboxData.items[lightboxData.index].id}-${lightboxData.index}`}
+                src={lightboxData.items[lightboxData.index].src} 
+                alt={lightboxData.items[lightboxData.index].alt} 
+                className="max-h-[75vh] md:max-h-[80vh] max-w-[90vw] md:max-w-4xl w-auto h-auto object-contain rounded-xl shadow-2xl animate-in zoom-in-95 duration-200"
               />
             </div>
 
@@ -510,23 +690,25 @@ export function Home() {
             className="w-full max-w-3xl flex flex-col items-center gap-2 z-20 pb-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-1.5 overflow-x-auto max-w-full px-4 py-1.5 scrollbar-none">
-              {staticGalleryImages.map((thumbSrc, idx) => (
+            <div className="flex items-center gap-2 overflow-x-auto max-w-full px-4 py-1.5 scrollbar-none">
+              {lightboxData.items.map((thumbItem, idx) => (
                 <button
-                  key={`thumb-${idx}`}
-                  onClick={() => setSelectedImageIndex(idx)}
-                  className={`relative flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                    selectedImageIndex === idx 
-                      ? "border-emerald-400 scale-110 shadow-md ring-2 ring-emerald-400/40" 
+                  key={`thumb-${thumbItem.id}`}
+                  onClick={() => setLightboxData({ ...lightboxData, index: idx })}
+                  className={`relative flex-shrink-0 w-11 h-11 md:w-13 md:h-13 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                    lightboxData.index === idx 
+                      ? thumbItem.level === "inicial"
+                        ? "border-emerald-400 scale-110 shadow-md ring-2 ring-emerald-400/40"
+                        : "border-rose-400 scale-110 shadow-md ring-2 ring-rose-400/40"
                       : "border-white/30 opacity-60 hover:opacity-100"
                   }`}
                   aria-label={`Ir a la foto ${idx + 1}`}
                 >
-                  <img loading="lazy"  src={thumbSrc} alt="" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={thumbItem.src} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-gray-400 hidden md:block">
+            <p className="text-[11px] text-gray-300 hidden md:block">
               Navegá con las flechas del teclado (← / →) o en loop con los botones · Tocá afuera o presiona Esc para cerrar
             </p>
           </div>
