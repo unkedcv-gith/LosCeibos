@@ -261,7 +261,7 @@ export function Home() {
                     className="flex-1 text-white text-xs md:text-sm font-bold py-3 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a]"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    WhatsApp Nivel Inicial
+                    Nivel Inicial
                   </a>
                   <a 
                     href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.primario.phone, activePopup.title)}
@@ -270,7 +270,7 @@ export function Home() {
                     className="flex-1 text-white text-xs md:text-sm font-bold py-3 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 bg-[#9b1c1c] hover:bg-[#7a1515]"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    WhatsApp Nivel Primario
+                    Nivel Primario
                   </a>
                 </div>
               ) : activePopup.level && activePopup.level !== "none" && WHATSAPP_CONFIG[activePopup.level as keyof typeof WHATSAPP_CONFIG] ? (
@@ -457,7 +457,7 @@ export function Home() {
                           className="flex-1 text-white text-[11px] font-bold py-2 px-2 rounded transition-colors flex items-center justify-center gap-1 bg-[#25D366] hover:bg-[#20bd5a]"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
-                          WhatsApp Inicial
+                          Nivel Inicial
                         </a>
                         <a 
                           href={buildWhatsAppConsultationUrl(WHATSAPP_CONFIG.primario.phone, announcement.title)}
@@ -466,7 +466,7 @@ export function Home() {
                           className="flex-1 text-white text-[11px] font-bold py-2 px-2 rounded transition-colors flex items-center justify-center gap-1 bg-[#9b1c1c] hover:bg-[#7a1515]"
                         >
                           <MessageCircle className="w-3.5 h-3.5" />
-                          WhatsApp Primario
+                          Nivel Primario
                         </a>
                       </div>
                     ) : announcement.level && announcement.level !== "none" && WHATSAPP_CONFIG[announcement.level as keyof typeof WHATSAPP_CONFIG] ? (
